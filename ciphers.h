@@ -7,10 +7,6 @@
     #define EXPORT
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // 1. Шифр Атбаш (зеркальная замена)
 EXPORT void atbash(char* data, long size);
 
@@ -22,7 +18,3 @@ bool isValidKey(const char* key, int length);
 
 // 3. TEA (Tiny Encryption Algorithm)
 EXPORT char* teaProcess(const char* data, long size, const char* password, bool encrypt, long& newSize);
-
-#ifdef __cplusplus
-}
-#endif

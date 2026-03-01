@@ -56,7 +56,7 @@ bool isValidKey(const char* key, int length) {
     return true;
 }
 
-extern "C" {
+// --- Основные функции шифров ---
 
 // 1. Реализация Атбаш
 void atbash(char* data, long size) {
@@ -83,9 +83,11 @@ char* doubleTransposition(const char* data, long size, const char* colKey, const
     memcpy(paddedData, data, size);
     for (long i = size; i < newSize; ++i) paddedData[i] = 'X';
 
-    // Создание таблиц перестановки
-    int colPerm[C], rowPerm[R];
-    int colInvPerm[C], rowInvPerm[R];
+    // Создание таблиц перестановки (Без VLA массивов)
+    int* colPerm = (int*)malloc(C * sizeof(int));
+    int* rowPerm = (int*)malloc(R * sizeof(int));
+    int* colInvPerm = (int*)malloc(C * sizeof(int));
+    int* rowInvPerm = (int*)malloc(R * sizeof(int));
 
     for (int i = 0; i < C; ++i) {
         colPerm[i] = colKey[i] - '1';
@@ -97,7 +99,10 @@ char* doubleTransposition(const char* data, long size, const char* colKey, const
     }
 
     char* output = (char*)malloc(newSize);
-    if (!output) { free(paddedData); return NULL; }
+    if (!output) { 
+        free(paddedData); free(colPerm); free(rowPerm); free(colInvPerm); free(rowInvPerm);
+        return NULL; 
+    }
 
     // Проход по блокам
     for (long b = 0; b < numBlocks; ++b) {
@@ -117,7 +122,9 @@ char* doubleTransposition(const char* data, long size, const char* colKey, const
             }
         }
     }
+    
     free(paddedData);
+    free(colPerm); free(rowPerm); free(colInvPerm); free(rowInvPerm);
 
     // Удаление 'X' при дешифровке
     if (!encrypt) {
@@ -174,5 +181,4 @@ char* teaProcess(const char* data, long size, const char* password, bool encrypt
         }
     }
     return buffer;
-}
 }
